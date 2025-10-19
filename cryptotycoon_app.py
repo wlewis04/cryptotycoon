@@ -1,71 +1,63 @@
 import streamlit as st
-import pandas as pd
-import time
 
 # ------------------------------
-# App Config
+# Streamlit Config
 # ------------------------------
 st.set_page_config(page_title="Crypto Tycoon 💰", layout="wide")
 st.title("Crypto Tycoon 💎 XRP Edition")
 st.subheader("Click, earn, upgrade, and grow your crypto empire!")
 
 # ------------------------------
-# Load / Initialize Data
+# Initialize Session State
 # ------------------------------
-try:
-    data = pd.read_csv("crypto_tycoon.csv")
-except:
-    data = pd.DataFrame([{
+if "tycoon" not in st.session_state:
+    st.session_state.tycoon = {
         "Balance": 0,
         "Click Power": 1,
         "Miners": 0,
         "Traders": 0,
         "Banks": 0,
-        "Income/sec": 0
-    }])
+        "IncomePerSec": 0
+    }
+
+tycoon = st.session_state.tycoon
 
 # ------------------------------
 # Helper Functions
 # ------------------------------
-def save_data():
-    data.to_csv("crypto_tycoon.csv", index=False)
-
 def update_income():
-    data.at[0, "Income/sec"] = data.at[0, "Miners"]*1 + data.at[0, "Traders"]*5 + data.at[0, "Banks"]*20
+    tycoon["IncomePerSec"] = tycoon["Miners"]*1 + tycoon["Traders"]*5 + tycoon["Banks"]*20
 
 def earn_click():
-    data.at[0, "Balance"] += data.at[0, "Click Power"]
-    save_data()
+    tycoon["Balance"] += tycoon["Click Power"]
 
 def buy_upgrade(upgrade):
-    cost = 0
     if upgrade == "Miner":
-        cost = 50 + data.at[0, "Miners"]*25
-        if data.at[0, "Balance"] >= cost:
-            data.at[0, "Balance"] -= cost
-            data.at[0, "Miners"] += 1
+        cost = 50 + tycoon["Miners"]*25
+        if tycoon["Balance"] >= cost:
+            tycoon["Balance"] -= cost
+            tycoon["Miners"] += 1
     elif upgrade == "Trader":
-        cost = 200 + data.at[0, "Traders"]*100
-        if data.at[0, "Balance"] >= cost:
-            data.at[0, "Balance"] -= cost
-            data.at[0, "Traders"] += 1
+        cost = 200 + tycoon["Traders"]*100
+        if tycoon["Balance"] >= cost:
+            tycoon["Balance"] -= cost
+            tycoon["Traders"] += 1
     elif upgrade == "Bank":
-        cost = 1000 + data.at[0, "Banks"]*500
-        if data.at[0, "Balance"] >= cost:
-            data.at[0, "Balance"] -= cost
-            data.at[0, "Banks"] += 1
+        cost = 1000 + tycoon["Banks"]*500
+        if tycoon["Balance"] >= cost:
+            tycoon["Balance"] -= cost
+            tycoon["Banks"] += 1
     update_income()
-    save_data()
 
 def earn_passive():
-    data.at[0, "Balance"] += data.at[0, "Income/sec"]
-    save_data()
+    tycoon["Balance"] += tycoon["IncomePerSec"]
 
 # ------------------------------
-# Main Game Loop
+# Main Game UI
 # ------------------------------
-st.metric("Your Balance 💰", f"{data.at[0, 'Balance']} XRP")
-st.metric("Income/sec ⚡", f"{data.at[0, 'Income/sec']} XRP")
+update_income()
+st.metric("Your Balance 💰", f"{tycoon['Balance']} XRP")
+st.metric("Income/sec ⚡", f"{tycoon['IncomePerSec']} XRP")
 
 if st.button("💎 Mine XRP!"):
     earn_click()
@@ -73,30 +65,24 @@ if st.button("💎 Mine XRP!"):
 
 st.subheader("Upgrades 🛠️")
 col1, col2, col3 = st.columns(3)
-
 with col1:
-    st.write(f"Miner ({data.at[0,'Miners']}) - Cost: {50 + data.at[0,'Miners']*25}")
+    st.write(f"Miner ({tycoon['Miners']}) - Cost: {50 + tycoon['Miners']*25}")
     if st.button("Buy Miner"):
         buy_upgrade("Miner")
         st.experimental_rerun()
 with col2:
-    st.write(f"Trader ({data.at[0,'Traders']}) - Cost: {200 + data.at[0,'Traders']*100}")
+    st.write(f"Trader ({tycoon['Traders']}) - Cost: {200 + tycoon['Traders']*100}")
     if st.button("Buy Trader"):
         buy_upgrade("Trader")
         st.experimental_rerun()
 with col3:
-    st.write(f"Bank ({data.at[0,'Banks']}) - Cost: {1000 + data.at[0,'Banks']*500}")
+    st.write(f"Bank ({tycoon['Banks']}) - Cost: {1000 + tycoon['Banks']*500}")
     if st.button("Buy Bank"):
         buy_upgrade("Bank")
         st.experimental_rerun()
 
-# ------------------------------
-# Passive Income Timer
-# ------------------------------
-update_income()
 st.subheader("Passive Income 💸")
-st.write("Earned automatically based on your upgrades!")
-
+st.write("Click below to collect income from your upgrades!")
 if st.button("Collect Passive Income"):
     earn_passive()
     st.experimental_rerun()
@@ -106,12 +92,12 @@ if st.button("Collect Passive Income"):
 # ------------------------------
 st.subheader("Achievements 🏆")
 achievements = []
-if data.at[0,"Balance"] >= 100: achievements.append("100 XRP 💰")
-if data.at[0,"Balance"] >= 500: achievements.append("500 XRP 💎")
-if data.at[0,"Balance"] >= 1000: achievements.append("1k XRP 🏅")
-if data.at[0,"Miners"] >= 5: achievements.append("5 Miners 🚀")
-if data.at[0,"Traders"] >= 3: achievements.append("3 Traders 📈")
-if data.at[0,"Banks"] >= 2: achievements.append("2 Banks 🏦")
+if tycoon["Balance"] >= 100: achievements.append("100 XRP 💰")
+if tycoon["Balance"] >= 500: achievements.append("500 XRP 💎")
+if tycoon["Balance"] >= 1000: achievements.append("1k XRP 🏅")
+if tycoon["Miners"] >= 5: achievements.append("5 Miners 🚀")
+if tycoon["Traders"] >= 3: achievements.append("3 Traders 📈")
+if tycoon["Banks"] >= 2: achievements.append("2 Banks 🏦")
 
 if achievements:
     for a in achievements:
@@ -120,6 +106,12 @@ else:
     st.write("No achievements yet. Keep clicking!")
 
 # ------------------------------
-# Save data
+# Optional Premium / Stripe Placeholder
 # ------------------------------
-save_data()
+st.sidebar.header("Upgrade to Premium 🚀")
+st.sidebar.write("Unlock multipliers and exclusive upgrades!")
+if st.sidebar.button("Upgrade via Stripe"):
+    st.sidebar.markdown("[Click here to pay via Stripe](YOUR_STRIPE_CHECKOUT_LINK)")
+
+st.sidebar.subheader("Tip 💡")
+st.sidebar.info("Click often, upgrade wisely, and watch your empire grow! 🚀")
