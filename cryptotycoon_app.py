@@ -1,14 +1,14 @@
-import streamlit as st
+mport streamlit as st
 
 # ------------------------------
-# Streamlit Config
+# Config
 # ------------------------------
 st.set_page_config(page_title="Crypto Tycoon 💰", layout="wide")
 st.title("Crypto Tycoon 💎 XRP Edition")
 st.subheader("Click, earn, upgrade, and grow your crypto empire!")
 
 # ------------------------------
-# Initialize Session State
+# Initialize Game State
 # ------------------------------
 if "tycoon" not in st.session_state:
     st.session_state.tycoon = {
@@ -53,7 +53,7 @@ def earn_passive():
     tycoon["Balance"] += tycoon["IncomePerSec"]
 
 # ------------------------------
-# Main Game UI
+# Main UI
 # ------------------------------
 update_income()
 st.metric("Your Balance 💰", f"{tycoon['Balance']} XRP")
@@ -61,31 +61,27 @@ st.metric("Income/sec ⚡", f"{tycoon['IncomePerSec']} XRP")
 
 if st.button("💎 Mine XRP!"):
     earn_click()
-    st.experimental_rerun()
 
 st.subheader("Upgrades 🛠️")
 col1, col2, col3 = st.columns(3)
+
 with col1:
     st.write(f"Miner ({tycoon['Miners']}) - Cost: {50 + tycoon['Miners']*25}")
-    if st.button("Buy Miner"):
+    if st.button("Buy Miner", key="miner"):
         buy_upgrade("Miner")
-        st.experimental_rerun()
 with col2:
     st.write(f"Trader ({tycoon['Traders']}) - Cost: {200 + tycoon['Traders']*100}")
-    if st.button("Buy Trader"):
+    if st.button("Buy Trader", key="trader"):
         buy_upgrade("Trader")
-        st.experimental_rerun()
 with col3:
     st.write(f"Bank ({tycoon['Banks']}) - Cost: {1000 + tycoon['Banks']*500}")
-    if st.button("Buy Bank"):
+    if st.button("Buy Bank", key="bank"):
         buy_upgrade("Bank")
-        st.experimental_rerun()
 
 st.subheader("Passive Income 💸")
 st.write("Click below to collect income from your upgrades!")
 if st.button("Collect Passive Income"):
     earn_passive()
-    st.experimental_rerun()
 
 # ------------------------------
 # Achievements
@@ -99,14 +95,11 @@ if tycoon["Miners"] >= 5: achievements.append("5 Miners 🚀")
 if tycoon["Traders"] >= 3: achievements.append("3 Traders 📈")
 if tycoon["Banks"] >= 2: achievements.append("2 Banks 🏦")
 
-if achievements:
-    for a in achievements:
-        st.success(a)
-else:
-    st.write("No achievements yet. Keep clicking!")
+for a in achievements:
+    st.success(a)
 
 # ------------------------------
-# Optional Premium / Stripe Placeholder
+# Optional Premium / Stripe
 # ------------------------------
 st.sidebar.header("Upgrade to Premium 🚀")
 st.sidebar.write("Unlock multipliers and exclusive upgrades!")
